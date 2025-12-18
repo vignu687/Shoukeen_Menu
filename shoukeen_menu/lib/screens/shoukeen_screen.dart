@@ -25,15 +25,25 @@ class _ShoukeenScreenState extends State<ShoukeenScreen> {
       showMenu = true;
     });
 
+    // Auto-hide menu after 3 seconds for PDFs
     if (menu != MenuType.home) {
       hideTimer = Timer(const Duration(seconds: 3), () {
-        if (mounted) setState(() => showMenu = false);
+        if (mounted) {
+          setState(() => showMenu = false);
+        }
       });
     }
   }
 
   void toggleMenuVisibility() {
+    hideTimer?.cancel();
     setState(() => showMenu = !showMenu);
+  }
+
+  @override
+  void dispose() {
+    hideTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -44,7 +54,7 @@ class _ShoukeenScreenState extends State<ShoukeenScreen> {
         onDoubleTap: toggleMenuVisibility,
         child: Stack(
           children: [
-            // Background
+            // BACKGROUND
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -58,13 +68,15 @@ class _ShoukeenScreenState extends State<ShoukeenScreen> {
               ),
             ),
 
-            // Content
+            // MAIN CONTENT (PDF / HOME)
             Positioned.fill(
               left: showMenu ? 60 : 0,
-              child: PdfContent(menuType: currentMenu),
+              child: PdfContent(
+                menuType: currentMenu,
+              ),
             ),
 
-            // Side Menu
+            // SIDE MENU
             SideMenu(
               visible: showMenu,
               selectedMenu: currentMenu,
@@ -73,6 +85,8 @@ class _ShoukeenScreenState extends State<ShoukeenScreen> {
           ],
         ),
       ),
+
+      // BOTTOM HOME BAR
       bottomNavigationBar: BottomHomeBar(
         onHome: () => onMenuSelected(MenuType.home),
       ),

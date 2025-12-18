@@ -22,7 +22,14 @@ class PdfContent extends StatelessWidget {
       );
     }
 
-    return SfPdfViewer.asset(_getPdfPath(menuType));
+    final pdfPath = _getPdfPath(menuType);
+
+    return SfPdfViewer.asset(
+      pdfPath,
+      key: ValueKey(pdfPath), // 🔥 forces reload
+      canShowScrollHead: false,
+      canShowScrollStatus: false,
+    );
   }
 
   String _getPdfPath(MenuType type) {
@@ -33,7 +40,7 @@ class PdfContent extends StatelessWidget {
         return 'assets/pdfs/liquor_menu.pdf';
       case MenuType.sheesha:
         return 'assets/pdfs/sheesha_menu.pdf';
-      default:
+      case MenuType.home:
         return '';
     }
   }

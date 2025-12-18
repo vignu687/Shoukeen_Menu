@@ -19,7 +19,7 @@ class SideMenu extends StatelessWidget {
       duration: const Duration(milliseconds: 250),
       left: visible ? 0 : -60,
       top: 0,
-      bottom: 70,
+      bottom: 0, // ✅ touches bottom bar
       child: Container(
         width: 60,
         color: Colors.black.withOpacity(0.4),

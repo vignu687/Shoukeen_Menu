@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/menu_type.dart';
 import '../widgets/side_menu.dart';
-import '../widgets/pdf_content.dart';
+import '../widgets/menu_image_content.dart';
 import '../widgets/bottom_home_bar.dart';
 
 class ShoukeenScreen extends StatefulWidget {
@@ -12,10 +12,42 @@ class ShoukeenScreen extends StatefulWidget {
   State<ShoukeenScreen> createState() => _ShoukeenScreenState();
 }
 
-class _ShoukeenScreenState extends State<ShoukeenScreen> {
+class _ShoukeenScreenState extends State<ShoukeenScreen>
+    with SingleTickerProviderStateMixin {
   MenuType currentMenu = MenuType.home;
   bool showMenu = true;
   Timer? hideTimer;
+
+  late AnimationController _gradientController;
+  late Animation<Color?> _topColor;
+  late Animation<Color?> _bottomColor;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _gradientController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 8),
+    )..repeat(reverse: true);
+
+    _topColor = ColorTween(
+      begin: Colors.black,
+      end: const Color(0xFF2C2206), // dark gold
+    ).animate(_gradientController);
+
+    _bottomColor = ColorTween(
+      begin: const Color(0xFF7A6116),
+      end: const Color(0xFFB89B3E), // warm gold
+    ).animate(_gradientController);
+  }
+
+  @override
+  void dispose() {
+    _gradientController.dispose();
+    hideTimer?.cancel();
+    super.dispose();
+  }
 
   void onMenuSelected(MenuType menu) {
     hideTimer?.cancel();
@@ -25,7 +57,6 @@ class _ShoukeenScreenState extends State<ShoukeenScreen> {
       showMenu = true;
     });
 
-    // Auto-hide menu after 3 seconds for PDFs
     if (menu != MenuType.home) {
       hideTimer = Timer(const Duration(seconds: 3), () {
         if (mounted) {
@@ -36,14 +67,7 @@ class _ShoukeenScreenState extends State<ShoukeenScreen> {
   }
 
   void toggleMenuVisibility() {
-    hideTimer?.cancel();
     setState(() => showMenu = !showMenu);
-  }
-
-  @override
-  void dispose() {
-    hideTimer?.cancel();
-    super.dispose();
   }
 
   @override
@@ -52,41 +76,44 @@ class _ShoukeenScreenState extends State<ShoukeenScreen> {
       backgroundColor: Colors.black,
       body: GestureDetector(
         onDoubleTap: toggleMenuVisibility,
-        child: Stack(
-          children: [
-            // BACKGROUND
-            Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black,
-                    Color(0xFF7A6116),
-                  ],
+        child: AnimatedBuilder(
+          animation: _gradientController,
+          builder: (context, _) {
+            return Stack(
+              children: [
+                // ===== ANIMATED BACKGROUND GRADIENT =====
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        _topColor.value ?? Colors.black,
+                        _bottomColor.value ?? const Color(0xFF7A6116),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
 
-            // MAIN CONTENT (PDF / HOME)
-            Positioned.fill(
-              left: showMenu ? 60 : 0,
-              child: PdfContent(
-                menuType: currentMenu,
-              ),
-            ),
+                // ===== MENU CONTENT (PNG BASED) =====
+                Positioned.fill(
+                  left: showMenu ? 60 : 0,
+                  child: MenuImageContent(menuType: currentMenu),
+                ),
 
-            // SIDE MENU
-            SideMenu(
-              visible: showMenu,
-              selectedMenu: currentMenu,
-              onSelect: onMenuSelected,
-            ),
-          ],
+                // ===== SIDE MENU =====
+                SideMenu(
+                  visible: showMenu,
+                  selectedMenu: currentMenu,
+                  onSelect: onMenuSelected,
+                ),
+              ],
+            );
+          },
         ),
       ),
 
-      // BOTTOM HOME BAR
+      // ===== BOTTOM HOME BAR =====
       bottomNavigationBar: BottomHomeBar(
         onHome: () => onMenuSelected(MenuType.home),
       ),

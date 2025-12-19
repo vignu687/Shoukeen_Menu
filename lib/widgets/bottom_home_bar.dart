@@ -3,19 +3,33 @@ import 'package:flutter/material.dart';
 class BottomHomeBar extends StatelessWidget {
   final VoidCallback onHome;
 
-  const BottomHomeBar({super.key, required this.onHome});
+  const BottomHomeBar({
+    super.key,
+    required this.onHome,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 70,
-      decoration: const BoxDecoration(
-        color: Color(0xFF1A0F1E),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      child: IconButton(
-        icon: const Icon(Icons.home, color: Colors.white),
-        onPressed: onHome,
+      height: 60,
+      color: Colors.black,
+      child: Center(
+        child: GestureDetector(
+          onTap: onHome,
+          child: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white70, width: 1.5),
+            ),
+            child: const Icon(
+              Icons.home,
+              color: Colors.white,
+              size: 22,
+            ),
+          ),
+        ),
       ),
     );
   }

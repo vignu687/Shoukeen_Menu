@@ -19,10 +19,10 @@ class SideMenu extends StatelessWidget {
       duration: const Duration(milliseconds: 250),
       left: visible ? 0 : -60,
       top: 0,
-      bottom: 0, // ✅ touches bottom bar
+      bottom: 0,
       child: Container(
         width: 60,
-        color: Colors.black.withOpacity(0.4),
+        color: Colors.black.withOpacity(0.5),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -36,7 +36,7 @@ class SideMenu extends StatelessWidget {
   }
 
   Widget _item(String title, MenuType type) {
-    final bool isActive = selectedMenu == type;
+    final isActive = selectedMenu == type;
 
     return GestureDetector(
       onTap: () => onSelect(type),

@@ -1,7 +1,9 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import '../models/menu_type.dart';
 
-class SideMenu extends StatelessWidget {
+class SideMenu extends StatefulWidget {
   final bool visible;
   final MenuType selectedMenu;
   final Function(MenuType) onSelect;
@@ -14,41 +16,222 @@ class SideMenu extends StatelessWidget {
   });
 
   @override
+  State<SideMenu> createState() => _SideMenuState();
+}
+
+class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin {
+  MenuType? _hovered;
+  MenuType? _focused;
+
+  static const double _collapsedWidth = 64;
+  static const double _labelMaxWidth = 96;
+  static const double _itemHeight = 62;
+  static const double _itemSpacing = 8;
+  static const double _topPadding = 10;
+
+  late final AnimationController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 360));
+    if (widget.visible) _ctrl.value = 1.0;
+  }
+
+  @override
+  void didUpdateWidget(covariant SideMenu oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.visible) {
+      _ctrl.forward();
+    } else {
+      _ctrl.reverse();
+    }
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  int? get _selectedIndex {
+    final idx = widget.selectedMenu.index - 1; // skip home
+    if (idx < 0) return null;
+    return idx;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AnimatedPositioned(
-      duration: const Duration(milliseconds: 250),
-      left: visible ? 0 : -60,
-      top: 0,
-      bottom: 0,
-      child: Container(
-        width: 60,
-        color: Colors.black.withOpacity(0.5),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _item("Food", MenuType.food),
-            _item("Liquor", MenuType.liquor),
-            _item("Sheesha", MenuType.sheesha),
-          ],
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
+      left: widget.visible ? 6 : -(_collapsedWidth + 16),
+      top: 200,
+      bottom: 200,
+      child: MouseRegion(
+        onEnter: (_) => _ctrl.forward(),
+        onExit: (_) {
+          if (!widget.visible) _ctrl.reverse();
+        },
+        child: AnimatedBuilder(
+          animation: _ctrl,
+          builder: (context, _) {
+            final width = lerpDouble(_collapsedWidth, _collapsedWidth + _labelMaxWidth, _ctrl.value)!;
+            return Container(
+              width: width,
+              margin: const EdgeInsets.only(left: 8),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(18)),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: _topPadding),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.black.withOpacity(0.56), Colors.black.withOpacity(0.26)],
+                      ),
+                      border: Border.all(color: Colors.white.withOpacity(0.04)),
+                      boxShadow: [
+                        BoxShadow(color: Colors.black.withOpacity(0.6), blurRadius: 24, offset: const Offset(0, 10)),
+                      ],
+                    ),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final totalItemsHeight = 3 * _itemHeight + 2 * _itemSpacing;
+                        final start = (constraints.maxHeight - totalItemsHeight) / 2;
+
+                        return Stack(
+                          children: [
+                            Positioned(
+                              top: start,
+                              left: 0,
+                              right: 0,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _buildItem(0, Icons.restaurant, 'Food', MenuType.food),
+                                  const SizedBox(height: _itemSpacing),
+                                  _buildItem(1, Icons.local_bar, 'Liquor', MenuType.liquor),
+                                  const SizedBox(height: _itemSpacing),
+                                  _buildItem(2, Icons.smoking_rooms, 'Sheesha', MenuType.sheesha),
+                                ],
+                              ),
+                            ),
+
+                            if (_selectedIndex != null) ...[
+                              AnimatedPositioned(
+                                duration: const Duration(milliseconds: 280),
+                                curve: Curves.easeOutCubic,
+                                left: 8,
+                                top: start + _selectedIndex! * (_itemHeight + _itemSpacing) + (_itemHeight - 44) / 2,
+                                child: Container(
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: RadialGradient(
+                                      colors: [const Color(0xFFB89B3E).withOpacity(0.18), Colors.transparent],
+                                      radius: 0.9,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              AnimatedPositioned(
+                                duration: const Duration(milliseconds: 260),
+                                curve: Curves.easeOutCubic,
+                                left: 6,
+                                top: start + _selectedIndex! * (_itemHeight + _itemSpacing) + (_itemHeight - 28) / 2,
+                                child: Container(
+                                  width: 4,
+                                  height: 28,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFB89B3E),
+                                    borderRadius: BorderRadius.circular(4),
+                                    boxShadow: [
+                                      BoxShadow(color: const Color(0xFFB89B3E).withOpacity(0.18), blurRadius: 10),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _item(String title, MenuType type) {
-    final isActive = selectedMenu == type;
+  Widget _buildItem(int index, IconData icon, String label, MenuType type) {
+    final isActive = widget.selectedMenu == type;
+    final isHover = _hovered == type;
+    final isFocus = _focused == type;
 
-    return GestureDetector(
-      onTap: () => onSelect(type),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 18),
-        child: RotatedBox(
-          quarterTurns: -1,
-          child: Text(
-            title,
-            style: TextStyle(
-              color: isActive ? Colors.white : Colors.white70,
-              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+    return Tooltip(
+      message: label,
+      child: FocusableActionDetector(
+        onShowFocusHighlight: (focused) => setState(() => _focused = focused ? type : null),
+        child: MouseRegion(
+          onEnter: (_) => setState(() => _hovered = type),
+          onExit: (_) => setState(() => _hovered = null),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => widget.onSelect(type),
+              borderRadius: BorderRadius.circular(12),
+              splashColor: Colors.white12,
+              highlightColor: Colors.white10,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                width: double.infinity,
+                height: _itemHeight,
+                margin: const EdgeInsets.symmetric(horizontal: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  color: isActive
+                      ? Colors.white.withOpacity(0.04)
+                      : (isHover ? Colors.white.withOpacity(0.02) : Colors.transparent),
+                  borderRadius: BorderRadius.circular(12),
+                  border: isFocus ? Border.all(color: Colors.white24) : null,
+                ),
+                child: Row(
+                  children: [
+                    AnimatedScale(
+                      duration: const Duration(milliseconds: 180),
+                      scale: isHover || isActive ? 1.08 : 1.0,
+                      child: Icon(icon, color: isActive ? const Color(0xFFB89B3E) : Colors.white70, size: 28),
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      fit: FlexFit.loose,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: (_ctrl.value > 0.25 || isHover || isActive) ? _labelMaxWidth : 0,
+                        curve: Curves.easeOutCubic,
+                        constraints: BoxConstraints(maxWidth: _labelMaxWidth),
+                        child: Opacity(
+                          opacity: (_ctrl.value > 0.25 || isHover || isActive) ? 1 : 0,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(label, overflow: TextOverflow.ellipsis, style: TextStyle(color: isActive ? Colors.white : Colors.white70, fontWeight: isActive ? FontWeight.w700 : FontWeight.w500)),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

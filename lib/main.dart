@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'screens/shoukeen_screen.dart';
+import 'package:shoukeen_menu/screens/shoukeen_screen.dart';
+// import 'screens/splash_screen.dart';
+import 'utils/route_observer.dart';
 
 void main() {
   runApp(const ShoukeenMenuApp());
@@ -10,9 +12,10 @@ class ShoukeenMenuApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: ShoukeenScreen(),
+      navigatorObservers: [routeObserver],
+      home: const ShoukeenScreen(),
     );
   }
 }

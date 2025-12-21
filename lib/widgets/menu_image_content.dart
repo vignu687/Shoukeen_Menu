@@ -36,16 +36,16 @@ class MenuImageContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (menuType == MenuType.home) {
-      return const Center(
-        child: Text(
-          'Shoukeen\nPremium Indian Lounge',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.white70,
-            fontSize: 26,
-          ),
-        ),
-      );
+      // return const Center(
+      //   child: Text(
+      //     // 'Shoukeen\nPremium Indian Lounge',
+      //     textAlign: TextAlign.center,
+      //     style: TextStyle(
+      //       color: Colors.white70,
+      //       fontSize: 26,
+      //     ),
+      //   ),
+      // );
     }
 
     final images = _getImages();

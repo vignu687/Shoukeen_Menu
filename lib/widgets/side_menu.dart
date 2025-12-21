@@ -62,7 +62,7 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
-    final topBottomPadding = isLandscape ? 50.0 : 200.0;
+    final topBottomPadding = isLandscape ? 25.0 : 200.0;
     
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 320),

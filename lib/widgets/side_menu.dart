@@ -55,19 +55,21 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
   }
 
   int? get _selectedIndex {
-    final idx = widget.selectedMenu.index - 1; // skip home
-    if (idx < 0) return null;
-    return idx;
+    return widget.selectedMenu.index;
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+    final topBottomPadding = isLandscape ? 50.0 : 200.0;
+    
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 320),
       curve: Curves.easeOutCubic,
       left: widget.visible ? 6 : -(_collapsedWidth + 16),
-      top: 200,
-      bottom: 200,
+      top: topBottomPadding,
+      bottom: topBottomPadding,
       child: MouseRegion(
         onEnter: (_) => _ctrl.forward(),
         onExit: (_) {
@@ -100,7 +102,7 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
                     ),
                     child: LayoutBuilder(
                       builder: (context, constraints) {
-                        final totalItemsHeight = 3 * _itemHeight + 2 * _itemSpacing;
+                        final totalItemsHeight = 4 * _itemHeight + 3 * _itemSpacing;
                         final start = (constraints.maxHeight - totalItemsHeight) / 2;
 
                         return Stack(
@@ -112,11 +114,13 @@ class _SideMenuState extends State<SideMenu> with SingleTickerProviderStateMixin
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  _buildItem(0, Icons.restaurant, 'Food', MenuType.food),
+                                  _buildItem(0, Icons.home, 'Home', MenuType.home),
                                   const SizedBox(height: _itemSpacing),
-                                  _buildItem(1, Icons.local_bar, 'Liquor', MenuType.liquor),
+                                  _buildItem(1, Icons.restaurant, 'Food', MenuType.food),
                                   const SizedBox(height: _itemSpacing),
-                                  _buildItem(2, Icons.smoking_rooms, 'Sheesha', MenuType.sheesha),
+                                  _buildItem(2, Icons.local_bar, 'Liquor', MenuType.liquor),
+                                  const SizedBox(height: _itemSpacing),
+                                  _buildItem(3, Icons.smoking_rooms, 'Sheesha', MenuType.sheesha),
                                 ],
                               ),
                             ),

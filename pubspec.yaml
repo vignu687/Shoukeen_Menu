@@ -68,8 +68,11 @@ flutter:
     - assets/images/sheesha/sheesha_menu_1.png
     - assets/images/sheesha/sheesha_menu_2.png
     - assets/images/logo/logo.jpg
-    - assets/images/logo/entry.jpeg
     - assets/images/video/video.mp4
+    - assets/images/logo/bg1.jpeg
+    - assets/images/logo/bg2.jpeg
+    - assets/images/logo/bg3.jpeg
+    - assets/images/logo/bg4.jpeg
 flutter_icons:
   android: true
   ios: false
